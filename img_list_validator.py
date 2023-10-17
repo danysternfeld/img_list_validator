@@ -1,6 +1,5 @@
 import pyodbc
-
-
+import re
 
 def getAccessData():
     tablepath = r'C:\Users\danys\OneDrive\Documents\TP_Shotlist1_with_timestamp.accdb'
@@ -27,8 +26,23 @@ def getAccessData():
         Result.append([row[imgnumIndex] , row[firstnameIndex] , row[lastnameIndex],row[timestampIndex]])
     return Result
 
+def ParseImgList():
+    imglistfile = open(r'TestData\Summary.txt')
+    imgList = []
+    data = imglistfile.readlines()
+    pattern = re.compile("(\d+)")
+    matches = pattern.findall(data[0])
+    return matches
+
+
+        
+
+
+
 #################
 ### main
 #################
-Accessdata = getAccessData()
-print(Accessdata)
+#Accessdata = getAccessData()
+#print(Accessdata)
+imgList = ParseImgList()
+print(imgList)
