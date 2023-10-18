@@ -115,7 +115,28 @@ def printEmpty(empty):
     print()
     print()
 
+def FindDuplicates(imagesInDB):
+    dupList = dict()
+    dupes = 0 
+    for row in imagesInDB:
+        imgnum = int(row[imgnumIndex])
+        if not imgnum in dupList.keys():
+            dupList[imgnum] = [row]
+        else:
+            dupes += 1
+            dupList[imgnum].append(row)
+    print("Found " + str(dupes) + " duplicates.")
+    for rowlist in dupList.values():
+        if len(rowlist) > 1 :
+            print( str(len(rowlist)) + " instances of " + str(rowlist[0][imgnumIndex]) + ":")
+            printRowHeader()
+            for row in rowlist:
+                printRow(row)
+            print()
 
+def printSectSeperator():
+    print("==================================================================================================")
+    print("==================================================================================================")
 
 
 #################
@@ -131,6 +152,10 @@ empty = getEmpty()
 nonEmpty = getNonEmpty()
 
 checkImgExists(nonEmpty,imgList)
+printSectSeperator()
 checkImagesNotInDB(nonEmpty,imgList)
+printSectSeperator()
+FindDuplicates(nonEmpty)
+printSectSeperator()
 printEmpty(empty)
 
