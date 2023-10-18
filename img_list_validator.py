@@ -57,7 +57,6 @@ def doDND():
     # this supports dropping a folder onto this script
     isDND = False    
     if(len(sys.argv) > 1 ):
-        #dir = 'C:\\Users\\danys\\OneDrive\\Documents\\scripts\\img_sorter\\Pictures\\staging\\FTP'
         dir = sys.argv[1]
         os.chdir(sys.argv[1])
         os.chdir(dir)
