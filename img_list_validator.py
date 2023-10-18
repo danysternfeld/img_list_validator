@@ -1,3 +1,22 @@
+# Copyright 2023 by Dany Sternfeld.
+# All rights reserved.
+#
+# This script validates the headshot image database for:
+# 1. people with a missing photo
+# 2. photos not linked to anyone
+# 3. duplicate photos linked to multiple people
+# 4. people without any photo
+#
+# Useage:
+# place the image DB in a directory along with the photo list Summary.txt.
+# the photo list is created with the lightroom plugin "lightroom transporter"
+# and is formated as a single line like this:
+#   ;;;IMGR1152;;;  ;;;IMGR1167;;;  ;;;IMGR4051;;; ...etc
+# Drag and drop the directory onto this script.
+# it will create a report in a file named imgListValidatorOut.txt
+# if Summary.txt is missing the script will only perform some of the checks.
+#################################################################################
+
 import pyodbc
 import re
 import sys
@@ -43,11 +62,15 @@ def getAccessData():
     return Result
 
 def ParseImgList():
-    imglistfile = open(r'Summary.txt')
-    imgList = []
-    data = imglistfile.readlines()
-    pattern = re.compile("(\d+)")
-    matches = pattern.findall(data[0])
+    matches = []
+    try:
+        imglistfile = open(r'Summary.txt')
+        imgList = []
+        data = imglistfile.readlines()
+        pattern = re.compile("(\d+)")
+        matches = pattern.findall(data[0])
+    except Exception as err:
+        print("could not open Summary.txt - operation will be limited")    
     return matches
 
 def getNonEmpty():
@@ -149,11 +172,11 @@ imgList = ParseImgList()
 #print(imgList)
 empty = getEmpty()
 nonEmpty = getNonEmpty()
-
-checkImgExists(nonEmpty,imgList)
-printSectSeperator()
-checkImagesNotInDB(nonEmpty,imgList)
-printSectSeperator()
+if len(imgList) > 0:
+    checkImgExists(nonEmpty,imgList)
+    printSectSeperator()
+    checkImagesNotInDB(nonEmpty,imgList)
+    printSectSeperator()
 FindDuplicates(nonEmpty)
 printSectSeperator()
 printEmpty(empty)
