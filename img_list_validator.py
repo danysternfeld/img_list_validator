@@ -1,5 +1,9 @@
 import pyodbc
 import re
+import sys
+import os
+
+
 
 tablename = 'data'
 serialIndex = 0
@@ -8,7 +12,7 @@ imgnumIndex = 5
 lastnameIndex = 3
 firstnameIndex = 4
 timestampIndex = 7
-tablepath = r'C:\Users\danys\OneDrive\Documents\TP_Shotlist1_with_timestamp.accdb'
+tablepath = r'.\TP_Shotlist1_with_timestamp.accdb'
 
 def tableConnect():
     conn = pyodbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + tablepath + ';')
@@ -39,20 +43,94 @@ def getAccessData():
     return Result
 
 def ParseImgList():
-    imglistfile = open(r'TestData\Summary.txt')
+    imglistfile = open(r'Summary.txt')
     imgList = []
     data = imglistfile.readlines()
     pattern = re.compile("(\d+)")
     matches = pattern.findall(data[0])
     return matches
 
- 
+def getNonEmpty():
+    return runSQL('select * from ' + tablename + ' where פספורט is NOT NULL')
+
+def doDND():
+    # this supports dropping a folder onto this script
+    isDND = False    
+    if(len(sys.argv) > 1 ):
+        #dir = 'C:\\Users\\danys\\OneDrive\\Documents\\scripts\\img_sorter\\Pictures\\staging\\FTP'
+        dir = sys.argv[1]
+        os.chdir(sys.argv[1])
+        os.chdir(dir)
+        isDND = True
+    return isDND
+
+def printRowHeader():
+    print("serial\t\timg Number\t\tname")
+    print("-------------------------------")
+
+def printRow(row):
+    print(str(row[serialIndex]) + "\t\t" + str(row[imgnumIndex]) + "\t\t" + row[firstnameIndex] + " " + row[lastnameIndex])
+
+def checkImgExists(nonEmptyRows,imgList):
+    print("Registered images that do not exists:")
+    print("=====================================")
+    print()
+    printRowHeader()
+    count = 0
+    for row in nonEmptyRows:
+        imgNum = row[imgnumIndex]
+        if not imgNum in imgList:
+            printRow(row)
+            count += 1
+    print("Total :" + str(count))
+    print()
+    print()
+
+
+def checkImagesNotInDB(nonEmptyRows,imgList):
+    print("Images that are not registered:")
+    print("-------------------------------")
+    print()
+    print("image number")
+    print("------------")
+    registered = []
+    count = 0
+    for row in nonEmptyRows:
+        registered.append(row[imgnumIndex])
+    for img in imgList:
+        if not img in registered:
+            print(img)
+            count += 1
+    print("Total :" + str(count))
+    print()
+    print()
+
+def printEmpty(empty):
+    print("No registered images (" + str(len(empty))+ "):")
+    print("=====================")
+    print()
+    printRowHeader()
+    for row in empty:
+        printRow(row)
+    print()
+    print()
+
+
+
 
 #################
 ### main
 #################
-Accessdata = getAccessData()
-print(Accessdata)
+isDND = doDND()
+sys.stdout =  open('imgListValidatorOut.txt', 'w', encoding='utf-8')
+#Accessdata = getAccessData()
+#print(Accessdata)
 imgList = ParseImgList()
-print(imgList)
-print(getEmpty())
+#print(imgList)
+empty = getEmpty()
+nonEmpty = getNonEmpty()
+
+checkImgExists(nonEmpty,imgList)
+checkImagesNotInDB(nonEmpty,imgList)
+printEmpty(empty)
+
