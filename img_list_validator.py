@@ -24,6 +24,9 @@ import sys
 import os
 import glob
 import traceback
+from lrtools.lrcat import LRCatDB, LRCatException
+from lrtools.lrselectgeneric import LRSelectException
+
 
 
 tablename = 'data'
@@ -69,14 +72,12 @@ def getAccessData():
 
 def ParseImgList():
     matches = []
-    try:
-        imglistfile = open(r'Summary.txt')
-        imgList = []
+    file = r'Summary.txt'
+    if os.path.exists(file):
+        imglistfile = open(file)
         data = imglistfile.readlines()
         pattern = re.compile("(\d+)")
         matches = pattern.findall(data[0])
-    except Exception as err:
-        print("could not open Summary.txt - operation will be limited")    
     return matches
 
 def getNonEmpty():
@@ -99,7 +100,7 @@ def printRow(row):
     print(str(row[serialIndex]) + "\t\t" + str(row[imgnumIndex]) + "\t\t" + row[firstnameIndex] + " " + row[lastnameIndex])
 
 def checkImgExists(nonEmptyRows,imgList):
-    print("Registered images that do not exists:")
+    print("Registered images that do not exist:")
     print("=====================================")
     print()
     printRowHeader()
@@ -165,6 +166,29 @@ def printSectSeperator():
     print("==================================================================================================")
     print("==================================================================================================")
 
+def getAccessMetaData():
+    schoolIndex = 1
+    lrcatIndex = 2
+    rows = runSQL('select * from metadata')
+    return (rows[0][schoolIndex],rows[0][lrcatIndex])
+
+def getImgListFromLR():
+    school,lrcat = getAccessMetaData()
+    lrdb = LRCatDB(lrcat)
+
+    # select photos
+    columns = "name=base"
+    criteria = f"collection={school}, rating=>4"
+    rows = lrdb.lrphoto.select_generic(columns, criteria).fetchall() # type: ignore
+    print("Got " + str(len(rows)) + " images from LR")
+    if(len(rows) == 0):
+        return []
+    pattern = re.compile("(\d+)")
+    matches = []
+    for row in rows:
+        matches.append((pattern.findall(row[0]))[0])
+    return matches
+
 
 #################
 ### main
@@ -172,17 +196,19 @@ def printSectSeperator():
 try:
     isDND = doDND()
     sys.stdout =  open('imgListValidatorOut.txt', 'w', encoding='utf-8')
-    #Accessdata = getAccessData()
-    #print(Accessdata)
     imgList = ParseImgList()
-    #print(imgList)
     empty = getEmpty()
     nonEmpty = getNonEmpty()
+    if len(imgList) == 0:
+        imgList = getImgListFromLR()
     if len(imgList) > 0:
         checkImgExists(nonEmpty,imgList)
         printSectSeperator()
         checkImagesNotInDB(nonEmpty,imgList)
         printSectSeperator()
+    else:
+        print("could not open Summary.txt - operation will be limited")
+
     FindDuplicates(nonEmpty)
     printSectSeperator()
     printEmpty(empty)
