@@ -7,11 +7,18 @@
 # 3. duplicate photos linked to multiple people
 # 4. people without any photo
 #
-# Useage:
+# Usage:
 # place the image DB in a directory along with the photo list Summary.txt.
 # the photo list is created with the lightroom plugin "lightroom transporter"
-# and is formated as a single line like this:
+# and is formatted as a single line like this:
 #   ;;;IMGR1152;;;  ;;;IMGR1167;;;  ;;;IMGR4051;;; ...etc
+# OR
+# Get data directly from lightroom :
+# 1. populate the metadata table in access with:
+#    a. Name of the school
+#    b. Path to the LR catalog
+# 2. Place all school images in LR in a collection named the same as in 1a.
+#
 # Drag and drop the directory onto this script.
 # it will create a report in a file named imgListValidatorOut.txt
 # if Summary.txt is missing the script will only perform some of the checks.
