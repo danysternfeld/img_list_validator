@@ -17,11 +17,13 @@
 # if Summary.txt is missing the script will only perform some of the checks.
 #################################################################################
 
+from sqlite3 import Timestamp
 import pyodbc
 import re
 import sys
 import os
-
+import glob
+import traceback
 
 
 tablename = 'data'
@@ -31,10 +33,14 @@ imgnumIndex = 5
 lastnameIndex = 3
 firstnameIndex = 4
 timestampIndex = 7
-tablepath = r'.\TP_Shotlist1_with_timestamp.accdb'
+
+def getTablePath():
+    acc = (glob.glob("*.accdb"))[0]
+    return acc
 
 def tableConnect():
-    conn = pyodbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + tablepath + ';')
+    tablepath = getTablePath()
+    conn = pyodbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=.\\' + tablepath + ';')
     cursor = conn.cursor()  
     return cursor  
 
@@ -80,8 +86,7 @@ def doDND():
     # this supports dropping a folder onto this script
     isDND = False    
     if(len(sys.argv) > 1 ):
-        dir = sys.argv[1]
-        os.chdir(sys.argv[1])
+        dir = (sys.argv[1])
         os.chdir(dir)
         isDND = True
     return isDND
@@ -164,20 +169,24 @@ def printSectSeperator():
 #################
 ### main
 #################
-isDND = doDND()
-sys.stdout =  open('imgListValidatorOut.txt', 'w', encoding='utf-8')
-#Accessdata = getAccessData()
-#print(Accessdata)
-imgList = ParseImgList()
-#print(imgList)
-empty = getEmpty()
-nonEmpty = getNonEmpty()
-if len(imgList) > 0:
-    checkImgExists(nonEmpty,imgList)
+try:
+    isDND = doDND()
+    sys.stdout =  open('imgListValidatorOut.txt', 'w', encoding='utf-8')
+    #Accessdata = getAccessData()
+    #print(Accessdata)
+    imgList = ParseImgList()
+    #print(imgList)
+    empty = getEmpty()
+    nonEmpty = getNonEmpty()
+    if len(imgList) > 0:
+        checkImgExists(nonEmpty,imgList)
+        printSectSeperator()
+        checkImagesNotInDB(nonEmpty,imgList)
+        printSectSeperator()
+    FindDuplicates(nonEmpty)
     printSectSeperator()
-    checkImagesNotInDB(nonEmpty,imgList)
-    printSectSeperator()
-FindDuplicates(nonEmpty)
-printSectSeperator()
-printEmpty(empty)
-
+    printEmpty(empty)
+except Exception as err:
+    print(f"Unexpected ERROR:\n {err=}, {type(err)=}")
+    print("error is: "+ traceback.format_exc())
+    input("press any key")
