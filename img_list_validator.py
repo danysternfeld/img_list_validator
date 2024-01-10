@@ -104,7 +104,7 @@ def printRowHeader():
     print("-------------------------------")
 
 def printRow(row):
-    print(str(row[serialIndex]) + "\t\t" + str(row[imgnumIndex]) + "\t\t" + row[firstnameIndex] + " " + row[lastnameIndex])
+    print(str(row[serialIndex]) + "\t\t" + str(row[imgnumIndex]) + "\t\t" + str(row[firstnameIndex]) + " " + str(row[lastnameIndex]))
 
 def checkImgExists(nonEmptyRows,imgList):
     print("Registered images that do not exist:")
