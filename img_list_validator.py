@@ -177,7 +177,11 @@ def getAccessMetaData():
     schoolIndex = 1
     lrcatIndex = 2
     rows = runSQL('select * from metadata')
-    return (rows[0][schoolIndex],rows[0][lrcatIndex])
+    # allow multiple metadata rows to support usage on multiple computers
+    for row in rows:
+        if os.path.exists(row[lrcatIndex]):
+            return (row[schoolIndex],row[lrcatIndex])        
+    raise Exception("No LR catalogue was found - check access metadata") 
 
 def getImgListFromLR():
     school,lrcat = getAccessMetaData()
