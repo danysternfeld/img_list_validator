@@ -200,6 +200,18 @@ def getImgListFromLR():
         matches.append((pattern.findall(row[0]))[0])
     return matches
 
+def RemoveLeadingZerosFromList(Ilist):
+    cleanList = []
+    for item in Ilist:
+        cleanList.append(item.lstrip("0"))
+    return cleanList
+
+
+def RemoveLeadingZerosFromDB(DBRows):
+    for item in DBRows:
+        item[imgnumIndex] = item[imgnumIndex].lstrip("0")
+
+
 
 #################
 ### main
@@ -213,6 +225,8 @@ try:
     if len(imgList) == 0:
         imgList = getImgListFromLR()
     if len(imgList) > 0:
+        imgList = RemoveLeadingZerosFromList(imgList)
+        RemoveLeadingZerosFromDB(nonEmpty)
         checkImgExists(nonEmpty,imgList)
         printSectSeperator()
         checkImagesNotInDB(nonEmpty,imgList)
