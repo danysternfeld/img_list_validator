@@ -193,6 +193,11 @@ def getImgListFromLR():
     rows = lrdb.lrphoto.select_generic(columns, criteria).fetchall() # type: ignore
     print("Got " + str(len(rows)) + " images from LR")
     if(len(rows) == 0):
+        print(r"/!\ /!\ /!\  !!! ")
+        print(r" T   T   T")
+        print("WARNING !!!!  NO IMAGES FROM LIGHTROOM !!!!")
+        print(r"/!\ /!\ /!\  !!! ")
+        print(r" T   T   T")        
         return []
     pattern = re.compile("(\d+)")
     matches = []
