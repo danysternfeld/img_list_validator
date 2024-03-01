@@ -25,6 +25,7 @@
 #################################################################################
 
 from sqlite3 import Timestamp
+from cv2 import log
 import pyodbc
 import re
 import sys
@@ -223,7 +224,8 @@ def RemoveLeadingZerosFromDB(DBRows):
 #################
 try:
     isDND = doDND()
-    sys.stdout =  open('imgListValidatorOut.txt', 'w', encoding='utf-8')
+    logFile = 'imgListValidatorOut.txt'
+    sys.stdout =  open(logFile, 'w', encoding='utf-8')
     imgList = ParseImgList()
     empty = getEmpty()
     nonEmpty = getNonEmpty()
@@ -242,6 +244,9 @@ try:
     FindDuplicates(nonEmpty)
     printSectSeperator()
     printEmpty(empty)
+    currdir = os.getcwd()
+    sys.stdout.close()
+    os.system(f"notepad {currdir}\\{logFile}")
 except Exception as err:
     print(f"Unexpected ERROR:\n {err=}, {type(err)=}")
     print("error is: "+ traceback.format_exc())
