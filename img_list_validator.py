@@ -109,11 +109,16 @@ def doDND():
     return isDND
 
 def printRowHeader():
-    print("serial\t\timg Number\t\tname")
+    print("code\t\timg Number\t\tname")
     print("-------------------------------")
 
 def printRow(row):
-    print(str(row[serialIndex]) + "\t\t" + str(row[imgnumIndex]) + "\t\t" + str(row[firstnameIndex]) + " " + str(row[lastnameIndex]))
+    code = row[codeIndex]
+    if(code != None):
+        code = str(int(code))
+    else:
+        code = "       "
+    print(code + "\t\t" + str(row[imgnumIndex]) + "\t\t" + str(row[firstnameIndex]) + " " + str(row[lastnameIndex]))
 
 def checkImgExists(nonEmptyRows,imgList):
     print("Registered images that do not exist:")
