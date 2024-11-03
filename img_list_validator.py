@@ -92,7 +92,7 @@ def ParseImgList():
     if os.path.exists(file):
         imglistfile = open(file)
         data = imglistfile.readlines()
-        pattern = re.compile("(\d+)")
+        pattern = re.compile(r"(\d+)")
         matches = pattern.findall(data[0])
     return matches
 
@@ -208,7 +208,7 @@ def getImgListFromLR():
         print(r"/!\ /!\ /!\  !!! ")
         print(r" T   T   T")        
         return []
-    pattern = re.compile("(\d+)$")
+    pattern = re.compile(r"(\d+)$")
     matches = []
     for row in rows:
         matches.append((pattern.findall(row[0]))[0])
