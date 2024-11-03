@@ -45,13 +45,21 @@ lastnameIndex = 3
 firstnameIndex = 4
 timestampIndex = 7
 
-def getTablePath():
-    acc = (glob.glob("*.accdb"))[0]
+def getTablePath():    
+    access_files = glob.glob("*.accdb")
+    if(len(access_files)==0):
+        print("No access file found.")
+        sys.exit()
+    acc = access_files[0]
     return acc
 
 def tableConnect():
     tablepath = getTablePath()
-    conn = pyodbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=.\\' + tablepath + ';')
+    try:
+        conn = pyodbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=.\\' + tablepath + ';')
+    except pyodbc.InterfaceError:
+        print("Can't connect to data. Is MS-ACCESS installed ?")
+        sys.exit()    
     cursor = conn.cursor()  
     return cursor  
 
