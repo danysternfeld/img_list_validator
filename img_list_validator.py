@@ -262,9 +262,9 @@ try:
     printSectSeperator()
     printEmpty(empty)
     currdir = os.getcwd()
-    sys.stdout.close()
-    os.system(f"notepad {currdir}\\{logFile}")
+    #sys.stdout.close()
+    #os.system(f"notepad {currdir}\\{logFile}")
 except Exception as err:
     print(f"Unexpected ERROR:\n {err=}, {type(err)=}")
     print("error is: "+ traceback.format_exc())
-    input("press any key")
+    #input("press any key")
