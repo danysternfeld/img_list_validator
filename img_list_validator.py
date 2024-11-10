@@ -34,6 +34,7 @@ import glob
 import traceback
 from lrtools.lrcat import LRCatDB, LRCatException
 from lrtools.lrselectgeneric import LRSelectException
+from modules.access import *
 
 
 
@@ -45,40 +46,14 @@ lastnameIndex = 3
 firstnameIndex = 4
 timestampIndex = 7
 
-def getTablePath():    
-    access_files = glob.glob("*.accdb")
-    if(len(access_files)==0):
-        print("No access file found.")
-        sys.exit()
-    if(len(access_files)>1):
-        print("More than 1 access file in this dir - exiting.")
-        sys.exit()
-    acc = access_files[0]
-    return acc
-
-def tableConnect():
-    tablepath = getTablePath()
-    try:
-        conn = pyodbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=.\\' + tablepath + ';')
-    except pyodbc.InterfaceError:
-        print("Can't connect to data. Is MS-ACCESS installed ?")
-        sys.exit()    
-    cursor = conn.cursor()  
-    return cursor  
-
-def runSQL(query):
-    cursor = tableConnect()
-    cursor.execute(query)
-    return cursor.fetchall()  
-
 def getEmpty():
-    return runSQL('select * from ' + tablename + ' where פספורט is NULL')
+    return runSQL('select * from ' + tablename + ' where פספורט is NULL',TABLE)
 
 def getAccessData():
     Result = []
     query = 'select * from ' + tablename
     #(786, 800265.0, 'כיתה 14', 'רתם', 'קציר', '4222', None, None)   
-    for row in runSQL(query):
+    for row in runSQL(query,TABLE):
         i = 0
         while i < len(row):
             if row[i] == None:
@@ -100,7 +75,7 @@ def ParseImgList():
     return matches
 
 def getNonEmpty():
-    return runSQL('select * from ' + tablename + ' where פספורט is NOT NULL')
+    return runSQL('select * from ' + tablename + ' where פספורט is NOT NULL',TABLE)
 
 def doDND():
     # this supports dropping a folder onto this script
@@ -190,19 +165,10 @@ def printSectSeperator():
     print("==================================================================================================")
     print("==================================================================================================")
 
-def getAccessMetaData():
-    schoolIndex = 1
-    lrcatIndex = 2
-    rows = runSQL('select * from metadata')
-    # allow multiple metadata rows to support usage on multiple computers
-    for row in rows:
-        path = os.path.expandvars(row[lrcatIndex])
-        if os.path.exists(path):
-            return (row[schoolIndex],path)        
-    raise Exception(f"No LR catalogue was found in {path} - check access metadata") 
+
 
 def getImgListFromLR():
-    school,lrcat = getAccessMetaData()
+    school,lrcat,SheetID,SheetName = getAccessMetaData()
     lrdb = LRCatDB(lrcat)
 
     # select photos
@@ -239,32 +205,33 @@ def RemoveLeadingZerosFromDB(DBRows):
 #################
 ### main
 #################
-try:
-    isDND = doDND()
-    logFile = 'imgListValidatorOut.txt'
-    sys.stdout =  open(logFile, 'w', encoding='utf-8')
-    imgList = ParseImgList()
-    empty = getEmpty()
-    nonEmpty = getNonEmpty()
-    if len(imgList) == 0:
-        imgList = getImgListFromLR()
-    if len(imgList) > 0:
-        imgList = RemoveLeadingZerosFromList(imgList)
-        RemoveLeadingZerosFromDB(nonEmpty)
-        checkImgExists(nonEmpty,imgList)
-        printSectSeperator()
-        checkImagesNotInDB(nonEmpty,imgList)
-        printSectSeperator()
-    else:
-        print("could not open Summary.txt - operation will be limited")
+if __name__ == "__main__":
+    try:
+        isDND = doDND()
+        logFile = 'imgListValidatorOut.txt'
+        sys.stdout =  open(logFile, 'w', encoding='utf-8')
+        imgList = ParseImgList()
+        empty = getEmpty()
+        nonEmpty = getNonEmpty()
+        if len(imgList) == 0:
+            imgList = getImgListFromLR()
+        if len(imgList) > 0:
+            imgList = RemoveLeadingZerosFromList(imgList)
+            RemoveLeadingZerosFromDB(nonEmpty)
+            checkImgExists(nonEmpty,imgList)
+            printSectSeperator()
+            checkImagesNotInDB(nonEmpty,imgList)
+            printSectSeperator()
+        else:
+            print("could not open Summary.txt - operation will be limited")
 
-    FindDuplicates(nonEmpty)
-    printSectSeperator()
-    printEmpty(empty)
-    currdir = os.getcwd()
-    #sys.stdout.close()
-    #os.system(f"notepad {currdir}\\{logFile}")
-except Exception as err:
-    print(f"Unexpected ERROR:\n {err=}, {type(err)=}")
-    print("error is: "+ traceback.format_exc())
-    #input("press any key")
+        FindDuplicates(nonEmpty)
+        printSectSeperator()
+        printEmpty(empty)
+        currdir = os.getcwd()
+        #sys.stdout.close()
+        #os.system(f"notepad {currdir}\\{logFile}")
+    except Exception as err:
+        print(f"Unexpected ERROR:\n {err=}, {type(err)=}")
+        print("error is: "+ traceback.format_exc())
+        #input("press any key")
