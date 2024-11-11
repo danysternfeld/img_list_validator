@@ -9,7 +9,7 @@ def getTablePath():
         print("No access file found.")
         sys.exit()
     if(len(access_files)>1):
-        print("More than 1 access file in this dir - exiting.")
+        print(f"More than 1 access file in this dir {os.getcwd()}- exiting.")
         sys.exit()
     acc = access_files[0]
     return acc
