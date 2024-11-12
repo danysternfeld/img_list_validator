@@ -8,16 +8,16 @@
 # 4. people without any photo
 #
 # Usage:
-# place the image DB in a directory along with the photo list Summary.txt.
-# the photo list is created with the lightroom plugin "lightroom transporter"
-# and is formatted as a single line like this:
-#   ;;;IMGR1152;;;  ;;;IMGR1167;;;  ;;;IMGR4051;;; ...etc
-# OR
 # Get data directly from lightroom :
 # 1. populate the metadata table in access with:
 #    a. Name of the school
 #    b. Path to the LR catalog
 # 2. Place all school images in LR in a collection named the same as in 1a.
+# OR
+# 1. Use an image folder instead of lightroom
+# 2. Populate the LRCat field in the access metadata table with either 
+#    the path to the folder or leave it blank if the images and access are in
+#    the same folder.
 #
 # Drag and drop the directory onto this script.
 # it will create a report in a file named imgListValidatorOut.txt
