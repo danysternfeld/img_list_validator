@@ -3,6 +3,7 @@ import sys
 import glob
 import os
 
+
 def getTablePath():    
     access_files = glob.glob("*.accdb")
     if(len(access_files)==0):
@@ -14,7 +15,7 @@ def getTablePath():
     acc = access_files[0]
     return acc
 
-TABLE = getTablePath()
+
 
 def tableConnect(tablepath):
     try:
@@ -30,15 +31,21 @@ def runSQL(query,path):
     cursor.execute(query)
     return cursor.fetchall()  
 
-def getAccessMetaData():
+def getAccessMetaData(table_path):
     schoolIndex = 1
     lrcatIndex = 2
     SheetID = 3
     SheetName = 4
-    rows = runSQL('select * from metadata',TABLE)
+    rows = runSQL('select * from metadata',table_path)
+    path = ""
+    pathlist = []
     # allow multiple metadata rows to support usage on multiple computers
     for row in rows:
-        path = os.path.expandvars(row[lrcatIndex])
+        if(row[lrcatIndex] != None):
+            path = os.path.expandvars(row[lrcatIndex])
+        else:
+            path = os.getcwd()
+        pathlist.append(path)
         if os.path.exists(path):
             result = []
             for item in row[1:]:
@@ -48,4 +55,4 @@ def getAccessMetaData():
                 for item in [""]*l:
                     result.append(item)   
             return (result)        
-    raise Exception(f"No LR catalogue was found in {path} - check access metadata") 
+    raise Exception(f"No path was found in {",".join(pathlist)} - check access metadata") 

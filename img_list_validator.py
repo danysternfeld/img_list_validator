@@ -24,9 +24,6 @@
 # if Summary.txt is missing the script will only perform some of the checks.
 #################################################################################
 
-from sqlite3 import Timestamp
-from cv2 import log
-import pyodbc
 import re
 import sys
 import os
@@ -36,7 +33,7 @@ from lrtools.lrcat import LRCatDB, LRCatException
 from lrtools.lrselectgeneric import LRSelectException
 from modules.access import *
 
-
+TABLE = ""
 
 tablename = 'data'
 serialIndex = 0
@@ -63,16 +60,6 @@ def getAccessData():
         print(row[imgnumIndex] + " " + row[firstnameIndex] + " " + row[lastnameIndex])
         Result.append([row[imgnumIndex] , row[firstnameIndex] , row[lastnameIndex],row[timestampIndex]])
     return Result
-
-def ParseImgList():
-    matches = []
-    file = r'Summary.txt'
-    if os.path.exists(file):
-        imglistfile = open(file)
-        data = imglistfile.readlines()
-        pattern = re.compile(r"(\d+)")
-        matches = pattern.findall(data[0])
-    return matches
 
 def getNonEmpty():
     return runSQL('select * from ' + tablename + ' where פספורט is NOT NULL',TABLE)
@@ -167,8 +154,7 @@ def printSectSeperator():
 
 
 
-def getImgListFromLR():
-    school,lrcat,SheetID,SheetName = getAccessMetaData()
+def getImgListFromLR(school,lrcat):
     lrdb = LRCatDB(lrcat)
 
     # select photos
@@ -186,7 +172,7 @@ def getImgListFromLR():
     pattern = re.compile(r"(\d+)$")
     matches = []
     for row in rows:
-        matches.append((pattern.findall(row[0]))[0])
+        matches.append((pattern.findall(row[0]))[0])  
     return matches
 
 def RemoveLeadingZerosFromList(Ilist):
@@ -200,7 +186,34 @@ def RemoveLeadingZerosFromDB(DBRows):
     for item in DBRows:
         item[imgnumIndex] = item[imgnumIndex].lstrip("0")
 
+def isLR(lrcat_field):
+    lr_postfix = ".lrcat"
+    res = lrcat_field.find(lr_postfix,len(lrcat_field)-len(lr_postfix))
+    if( res != -1):
+        return True
+    return False
 
+def getImgListFromFolder(lrcat_field):
+    folder = os.getcwd()
+    imglist = []
+    if(lrcat_field != ""):
+        folder = lrcat_field
+    if(not os.path.isdir(folder)):
+        print(f"ERROR: No such folder {folder}")
+    else:
+        files = glob.glob("*.jpg")
+        for file in files:
+            match = re.findall(r"(\d+)\.jpg",file)
+            if(len(match)>0):
+                imglist.append(match[0])
+    print("Got " + str(len(imglist)) + f" images from folder {folder}")
+    if(len(imglist) == 0):
+        print(r"/!\ /!\ /!\  !!! ")
+        print(r" T   T   T")
+        print("WARNING !!!!  NO IMAGES FOUND IN FOLDER!!!!")
+        print(r"/!\ /!\ /!\  !!! ")
+        print(r" T   T   T") 
+    return imglist
 
 #################
 ### main
@@ -208,13 +221,21 @@ def RemoveLeadingZerosFromDB(DBRows):
 if __name__ == "__main__":
     try:
         isDND = doDND()
+        TABLE = getTablePath()
+        school,lrcat,SheetID,SheetName = getAccessMetaData(TABLE)
         logFile = 'imgListValidatorOut.txt'
         sys.stdout =  open(logFile, 'w', encoding='utf-8')
-        imgList = ParseImgList()
         empty = getEmpty()
         nonEmpty = getNonEmpty()
-        if len(imgList) == 0:
-            imgList = getImgListFromLR()
+        if(lrcat == None):
+            # empty lrcat field - use CWD
+            imgList = getImgListFromFolder("")
+        else:
+            if isLR(lrcat):
+                imgList = getImgListFromLR(school,lrcat)
+            else:
+                # non empty and not LR cat: assume folder
+                imgList = getImgListFromFolder(lrcat)
         if len(imgList) > 0:
             imgList = RemoveLeadingZerosFromList(imgList)
             RemoveLeadingZerosFromDB(nonEmpty)
@@ -222,8 +243,6 @@ if __name__ == "__main__":
             printSectSeperator()
             checkImagesNotInDB(nonEmpty,imgList)
             printSectSeperator()
-        else:
-            print("could not open Summary.txt - operation will be limited")
 
         FindDuplicates(nonEmpty)
         printSectSeperator()

@@ -99,11 +99,12 @@ def gen_new_excel(lines):
 
 
 
-
+TABLE = ""
 
 
 if __name__ == "__main__":
-    school,lrcat,sheet_id,sheet_name = getAccessMetaData()    
+    TABLE = getTablePath()
+    school,lrcat,sheet_id,sheet_name = getAccessMetaData(TABLE)    
     print("Sheet name: ", flip(sheet_name))
     #sheet_name = u"יסודי רבין פרדס חנה - 3127280 - 22497 - קובץ צלם"
     #sheet_id = "1GjIfbHUEdywOmaCLYQqSBEN0gqRLKqnj-cPc6KGuAgk"
