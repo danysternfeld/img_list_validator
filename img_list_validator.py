@@ -203,7 +203,11 @@ def getImgListFromFolder(lrcat_field):
     else:
         files = glob.glob("*.jpg")
         for file in files:
-            match = re.findall(r"(\d+)\.jpg",file)
+            match = ""
+            if(file.find("_1_P")> -1):
+                match = re.findall(r"(\d+)_1_P_",file)
+            else:
+                match = re.findall(r"(\d+)\.jpg",file)
             if(len(match)>0):
                 imglist.append(match[0])
     print("Got " + str(len(imglist)) + f" images from folder {folder}")
