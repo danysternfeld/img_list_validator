@@ -3,11 +3,12 @@ import os
 from sys import exception
 import sys
 import tempfile
+from threading import local
 from cv2 import filter2D
 from numpy import astype
 import undetected_chromedriver as uc
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+#from selenium import webdriver
+#from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import csv
@@ -42,7 +43,6 @@ def download_sheet(sheet_ID):
     if(not created_now):
         options.add_argument('--headless')
         waittime = 10
-        #pass
     options.add_argument(rf'--user-data-dir={datadir}')
     options.add_experimental_option( "prefs", { "download.default_directory": tmpdir })
     url = f"https://docs.google.com/spreadsheets/d/{sheet_ID}/export?format=csv"
@@ -103,24 +103,36 @@ TABLE = ""
 
 
 if __name__ == "__main__":
-    TABLE = getTablePath()
-    school,lrcat,sheet_id,sheet_name = getAccessMetaData(TABLE)    
-    print("Sheet name: ", flip(sheet_name))
-    #sheet_name = u"יסודי רבין פרדס חנה - 3127280 - 22497 - קובץ צלם"
-    #sheet_id = "1GjIfbHUEdywOmaCLYQqSBEN0gqRLKqnj-cPc6KGuAgk"
-    #sheet_id = "19Bi24J01aKROwjhoYbK4Zgn3E5h2sa41wfHiGCBO8FM"
-    #sheet_name = "אורט אמירים בית שאן - 2401270 - 22864 - קובץ צלם"
-    filename = fr"{tempfile.gettempdir()}\{sheet_name} - Student_items.csv" 
-    clean(filename)
-    download_sheet(sheet_id)  
-    if(not os.path.exists(filename)):
-        raise Exception(f"Could not download file {filename}")
+    needCleanup = False
+    localfile = glob.glob(r".\*.csv")
+    if len(localfile) > 1 :
+        print(f"Error: More than 1 csv file foud in {os.getcwd()} : " + ','.join(localfile))
+        input("press any key...")
+        sys.exit()
+    if len(localfile) == 1 :
+        filename = localfile[0]
+    else:
+        TABLE = getTablePath()
+        school,lrcat,sheet_id,sheet_name = getAccessMetaData(TABLE)    
+        print("Sheet name: ", flip(sheet_name))
+        #sheet_name = u"יסודי רבין פרדס חנה - 3127280 - 22497 - קובץ צלם"
+        #sheet_id = "1GjIfbHUEdywOmaCLYQqSBEN0gqRLKqnj-cPc6KGuAgk"
+        #sheet_id = "19Bi24J01aKROwjhoYbK4Zgn3E5h2sa41wfHiGCBO8FM"
+        #sheet_name = "אורט אמירים בית שאן - 2401270 - 22864 - קובץ צלם"
+        basefilename = f"{sheet_name} - Student_items.csv"
+        filename = fr"{tempfile.gettempdir()}\{basefilename}" 
+        clean(filename)
+        needCleanup = True
+        download_sheet(sheet_id)  
+        if(not os.path.exists(filename)):
+            raise Exception(f"Could not download file {filename}")
+    
     lines = read_csv(filename)
     data = transform_data(lines)
     if not data.empty:
         gen_new_excel(data)
-
-    clean(filename)
+    if needCleanup:
+        clean(filename)
     
 
 
