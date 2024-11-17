@@ -7,13 +7,12 @@ from threading import local
 from cv2 import filter2D
 from numpy import astype
 import undetected_chromedriver as uc
-#from selenium import webdriver
-#from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import csv
 import pandas as pd
 from bidi.algorithm import get_display
+import chrome_version
 from modules.access import *
 
 def flip(x):
@@ -94,7 +93,7 @@ def gen_new_excel(lines):
         print(flip(fr"Created {currentDir}\{filename}"))
     except PermissionError:
         print("Error: Failed to write data.xlsx. If opened in excel please close it.")
-        input()
+        input("Press any key...")
         sys.exit() 
 
 
@@ -112,6 +111,10 @@ if __name__ == "__main__":
     if len(localfile) == 1 :
         filename = localfile[0]
     else:
+        if(chrome_version.get_chrome_version() == None):
+            print("Error: Could not detect Chrome installation. Chrome must be installed.")
+            input("Press any key...")
+            sys.exit()
         TABLE = getTablePath()
         school,lrcat,sheet_id,sheet_name = getAccessMetaData(TABLE)    
         print("Sheet name: ", flip(sheet_name))
