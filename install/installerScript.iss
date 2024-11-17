@@ -33,6 +33,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "img_list_validator.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "get_name_list.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\lrtools.ini"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\TestData\With_LR_DATA\*"; DestDir: "{app}\Sample_data\With_LIGHTROOM"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\TestData\With_Folder\*"; DestDir: "{app}\Sample_data\With_Folder"; Flags: ignoreversion recursesubdirs createallsubdirs
