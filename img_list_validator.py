@@ -233,6 +233,7 @@ if __name__ == "__main__":
             imgList = getImgListFromFolder("")
         else:
             if isLR(lrcat):
+                lrcat = os.path.expandvars(lrcat)
                 imgList = getImgListFromLR(school,lrcat)
             else:
                 # non empty and not LR cat: assume folder
