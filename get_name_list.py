@@ -1,3 +1,13 @@
+#  Dany Sternfeld - Oct 2024
+# Get data from TP's new site and transform it to the older format.
+# Generated an excel file data.xlsx that can be imported to TP_shotlist.accdb
+#
+# Can either download the data from TP or use a .csv file that was manually downloaded.
+# to use - either :
+# 1. place sheetID and name in the metadata table to the TP_Shotlist.accdb access file
+# 2. OR - place a manualy downloaded csv in the same dir as the accdb file.
+#
+####################################################################################
 from encodings import utf_8
 import os
 from sys import exception
@@ -32,14 +42,15 @@ def make_selenium_data_dir():
         datadir_created_now = True
     return (datadir,datadir_created_now)
 
-
+# Download sheet to windows tmp dir.
 def download_sheet(sheet_ID):
-
     tmpdir = tempfile.gettempdir()
     (datadir,created_now) = make_selenium_data_dir()
     options = uc.ChromeOptions()
     waittime = 600
     if(not created_now):
+        # run in headless mode if the selenium data dir was just created.
+        # we assume the user does not need to log in to google again
         options.add_argument('--headless')
         waittime = 10
     options.add_argument(rf'--user-data-dir={datadir}')
@@ -49,8 +60,10 @@ def download_sheet(sheet_ID):
     driver = uc.Chrome(options = options,use_subprocess=True)
     driver.get(url)
     try:
+        # when downloading, the web page does not change, so the until is bogus
         WebDriverWait(driver, waittime).until(EC.title_is("xxx"))
     except:
+        # should get here after timeout
         print(f"Done.")
         return
     
@@ -64,7 +77,8 @@ def read_csv(filename):
         csvreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
         lines = []
         for row in csvreader:
-            lines.append(row[0].split(","))   
+            lines.append(row[0].split(",")) 
+        # drop the first 5 lines. they contain junk we don't need.      
         return lines[5:]
 
 def transform_data(lines):
@@ -74,7 +88,7 @@ def transform_data(lines):
     ColIndices = {}
     for header,index in zip(col_headers,range(len(col_headers))):
         ColIndices[header] = index
-    df = pd.DataFrame(lines[5:])  
+    df = pd.DataFrame(lines)  
     if df.empty:
         return df
     filteredDf = pd.DataFrame(df[[ColIndices["auto number"],ColIndices["Class number"],ColIndices["First Name"],ColIndices["Last Name"],
