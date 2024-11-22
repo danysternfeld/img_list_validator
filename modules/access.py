@@ -55,4 +55,4 @@ def getAccessMetaData(table_path):
                 for item in [""]*l:
                     result.append(item)   
             return (result)        
-    raise Exception(f"No path was found in {",".join(pathlist)} - check access metadata") 
+    raise Exception(f"No path was found in {','.join(pathlist)} - check access metadata") 
