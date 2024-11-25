@@ -50,4 +50,5 @@ Name: "{autodesktop}\Image List Validator"; Filename: "{app}\img_list_validator.
 Root: HKCU; Subkey: "Software\Classes\Directory\Background\Shell"; 
 Root: HKCU; Subkey: "Software\Classes\Directory\Background\Shell\Image List Validator"; Flags: uninsdeletekey ; ValueType: string; ValueName: "Icon"; ValueData: "{app}\img_list_validator.exe"
 Root: HKCU; Subkey: "Software\Classes\Directory\Background\Shell\Image List Validator\Command"; Flags: uninsdeletekey ; ValueType: string; ValueName: ""; ValueData: "{app}\img_list_validator.exe"
+Root: HKCU; Subkey: "Software\DanySternfeld\img_list_validator"; Flags: uninsdeletekey ; ValueType: string; ValueName: "Path"; ValueData: "{app}"
 
