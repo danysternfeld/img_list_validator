@@ -3,27 +3,16 @@
 # Generated an excel file data.xlsx that can be imported to TP_shotlist.accdb
 #
 # Can either download the data from TP or use a .csv file that was manually downloaded.
-# to use - either :
-# 1. place sheetID and name in the metadata table to the TP_Shotlist.accdb access file
-# 2. OR - place a manualy downloaded csv in the same dir as the accdb file.
+# to use, place a manualy downloaded csv in the same dir as the accdb file.
 #
 ####################################################################################
-from encodings import utf_8
 import os
-from sys import exception
 import sys
-import tempfile
-from threading import local
-from cv2 import filter2D
-from numpy import astype
-import undetected_chromedriver as uc
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import csv
+import glob
 import pandas as pd
 from bidi.algorithm import get_display
-import chrome_version
-from modules.access import *
+
 
 def flip(x):
   if(type(x) is list):
@@ -33,40 +22,6 @@ def flip(x):
     return new_list
   return get_display(x)
 
-def make_selenium_data_dir():
-    user = os.environ["USERPROFILE"]
-    datadir = fr'{user}\selenium_data'
-    datadir_created_now = False
-    if(not os.path.isdir(datadir)):
-        os.mkdir(datadir)
-        datadir_created_now = True
-    return (datadir,datadir_created_now)
-
-# Download sheet to windows tmp dir.
-def download_sheet(sheet_ID):
-    tmpdir = tempfile.gettempdir()
-    (datadir,created_now) = make_selenium_data_dir()
-    options = uc.ChromeOptions()
-    waittime = 600
-    if(not created_now):
-        # run in headless mode if the selenium data dir was just created.
-        # we assume the user does not need to log in to google again
-        options.add_argument('--headless')
-        waittime = 10
-    options.add_argument(rf'--user-data-dir={datadir}')
-    options.add_experimental_option( "prefs", { "download.default_directory": tmpdir })
-    url = f"https://docs.google.com/spreadsheets/d/{sheet_ID}/export?format=csv"
-    print(f"downloading {url}...")
-    driver = uc.Chrome(options = options,use_subprocess=True)
-    driver.get(url)
-    try:
-        # when downloading, the web page does not change, so the until is bogus
-        WebDriverWait(driver, waittime).until(EC.title_is("xxx"))
-    except:
-        # should get here after timeout
-        print(f"Done.")
-        return
-    
     
 def clean(filename):
     if(os.path.exists(filename)):
@@ -92,9 +47,14 @@ def transform_data(lines):
     if df.empty:
         return df
     filteredDf = pd.DataFrame(df[[ColIndices["auto number"],ColIndices["Class number"],ColIndices["First Name"],ColIndices["Last Name"],
-                        ColIndices["Job Title"]]])
-    filteredDf.insert(loc=4, column='פספורט', value=['' for i in range(filteredDf.shape[0])])
-    filteredDf.columns = ["קוד", "פרק", "פרטי",	"משפחה",	"פספורט",	"תפקיד"]  
+                        ColIndices["Content"],ColIndices["Job Title"]]])
+    filteredDf.columns = ["קוד", "פרק", "פרטי",	"משפחה",	"פספורט",	"תפקיד"] 
+    # doing this because Added entries may have empty code values
+    val = 0
+    for i in  range(filteredDf.shape[0]):
+        filteredDf.iloc[i,0] = val+1
+        val+=1
+
     filteredDf["קוד"]  = filteredDf["קוד"].astype(int) + 900111
     filteredDf["פרק"]  =  "כיתה " + filteredDf["פרק"] 
     return filteredDf
@@ -125,24 +85,10 @@ if __name__ == "__main__":
     if len(localfile) == 1 :
         filename = localfile[0]
     else:
-        if(chrome_version.get_chrome_version() == None):
-            print("Error: Could not detect Chrome installation. Chrome must be installed.")
-            input("Press any key...")
-            sys.exit()
-        TABLE = getTablePath()
-        school,lrcat,sheet_id,sheet_name = getAccessMetaData(TABLE)    
-        print("Sheet name: ", flip(sheet_name))
-        #sheet_name = u"יסודי רבין פרדס חנה - 3127280 - 22497 - קובץ צלם"
-        #sheet_id = "1GjIfbHUEdywOmaCLYQqSBEN0gqRLKqnj-cPc6KGuAgk"
-        #sheet_id = "19Bi24J01aKROwjhoYbK4Zgn3E5h2sa41wfHiGCBO8FM"
-        #sheet_name = "אורט אמירים בית שאן - 2401270 - 22864 - קובץ צלם"
-        basefilename = f"{sheet_name} - Student_items.csv"
-        filename = fr"{tempfile.gettempdir()}\{basefilename}" 
-        clean(filename)
-        needCleanup = True
-        download_sheet(sheet_id)  
-        if(not os.path.exists(filename)):
-            raise Exception(f"Could not download file {filename}")
+        print(f"Error: No csv file foud in {os.getcwd()} : " + ','.join(localfile))
+        input("press any key...")
+        sys.exit()
+
     
     lines = read_csv(filename)
     data = transform_data(lines)

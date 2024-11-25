@@ -1,3 +1,4 @@
+from tkinter import NO
 import pyodbc
 import sys
 import glob
@@ -40,19 +41,20 @@ def getAccessMetaData(table_path):
     path = ""
     pathlist = []
     # allow multiple metadata rows to support usage on multiple computers
-    for row in rows:
-        if(row[lrcatIndex] != None):
-            path = os.path.expandvars(row[lrcatIndex])
-        else:
-            path = os.getcwd()
-        pathlist.append(path)
-        if os.path.exists(path):
-            result = []
-            for item in row[1:]:
-                result.append(item)
-            if(len(result) < 4):
-                l = len(result)
-                for item in [""]*l:
-                    result.append(item)   
-            return (result)        
-    raise Exception(f"No path was found in {','.join(pathlist)} - check access metadata") 
+    if(len(rows) > 0):
+        for row in rows:
+            if(row[lrcatIndex] != None):
+                path = os.path.expandvars(row[lrcatIndex])
+            else:
+                path = os.getcwd()
+            pathlist.append(path)
+            if os.path.exists(path):
+                result = []
+                for item in row[1:]:
+                    result.append(item)
+                if(len(result) < 4):
+                    l = len(result)
+                    for item in [""]*l:
+                        result.append(item)   
+                return (result)             
+    return [None,None,None,None]
