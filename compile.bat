@@ -5,3 +5,6 @@ copy dist\*.exe install\
 cd install
 "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" ./installerScript.iss
 del *.exe
+cd ..
+.\update_appdata.bat
+
