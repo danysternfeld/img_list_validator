@@ -2,8 +2,9 @@
 # Get data from TP's new site and transform it to the older format.
 # Generated an excel file data.xlsx that can be imported to TP_shotlist.accdb
 #
-# Can either download the data from TP or use a .csv file that was manually downloaded.
+# Use a .csv file that was manually downloaded from the new site.
 # to use, place a manualy downloaded csv in the same dir as the accdb file.
+# Launched from TP_shotlist.accdb or from the cmdline. 
 #
 ####################################################################################
 import os
