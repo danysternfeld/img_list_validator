@@ -43,23 +43,12 @@ lastnameIndex = 3
 firstnameIndex = 4
 timestampIndex = 7
 
+
+def Print2File(txt=''):
+    OUTFILE.writelines(txt+'\n')
+
 def getEmpty():
     return runSQL('select * from ' + tablename + ' where פספורט is NULL',TABLE)
-
-def getAccessData():
-    Result = []
-    query = 'select * from ' + tablename
-    #(786, 800265.0, 'כיתה 14', 'רתם', 'קציר', '4222', None, None)   
-    for row in runSQL(query,TABLE):
-        i = 0
-        while i < len(row):
-            if row[i] == None:
-                row[i] = ""
-            i += 1
-        #print(row)
-        print(row[imgnumIndex] + " " + row[firstnameIndex] + " " + row[lastnameIndex])
-        Result.append([row[imgnumIndex] , row[firstnameIndex] , row[lastnameIndex],row[timestampIndex]])
-    return Result
 
 def getNonEmpty():
     return runSQL('select * from ' + tablename + ' where פספורט is NOT NULL',TABLE)
@@ -73,61 +62,61 @@ def doDND():
         isDND = True
     return isDND
 
-def printRowHeader():
-    print("code\t\timg Number\t\tname")
-    print("-------------------------------")
+def PrintRowHeader():
+    Print2File("code\t\timg Number\t\tname")
+    Print2File("-------------------------------")
 
-def printRow(row):
+def Print2FileRow(row):
     code = row[codeIndex]
     if(code != None):
         code = str(int(code))
     else:
         code = "       "
-    print(code + "\t\t" + str(row[imgnumIndex]) + "\t\t" + str(row[firstnameIndex]) + " " + str(row[lastnameIndex]))
+    Print2File(code + "\t\t" + str(row[imgnumIndex]) + "\t\t" + str(row[firstnameIndex]) + " " + str(row[lastnameIndex]))
 
 def checkImgExists(nonEmptyRows,imgList):
-    print("Registered images that do not exist:")
-    print("=====================================")
-    print()
-    printRowHeader()
+    Print2File("Registered images that do not exist:")
+    Print2File("=====================================")
+    Print2File()
+    PrintRowHeader()
     count = 0
     for row in nonEmptyRows:
         imgNum = row[imgnumIndex]
         if not imgNum in imgList:
-            printRow(row)
+            Print2FileRow(row)
             count += 1
-    print("Total :" + str(count))
-    print()
-    print()
+    Print2File("Total :" + str(count))
+    Print2File()
+    Print2File()
 
 
 def checkImagesNotInDB(nonEmptyRows,imgList):
-    print("Images that are not registered:")
-    print("-------------------------------")
-    print()
-    print("image number")
-    print("------------")
+    Print2File("Images that are not registered:")
+    Print2File("-------------------------------")
+    Print2File()
+    Print2File("image number")
+    Print2File("------------")
     registered = []
     count = 0
     for row in nonEmptyRows:
         registered.append(row[imgnumIndex])
     for img in imgList:
         if not img in registered:
-            print(img)
+            Print2File(img)
             count += 1
-    print("Total :" + str(count))
-    print()
-    print()
+    Print2File("Total :" + str(count))
+    Print2File()
+    Print2File()
 
-def printEmpty(empty):
-    print("No registered images (" + str(len(empty))+ "):")
-    print("=====================")
-    print()
-    printRowHeader()
+def Print2FileEmpty(empty):
+    Print2File("No registered images (" + str(len(empty))+ "):")
+    Print2File("=====================")
+    Print2File()
+    PrintRowHeader()
     for row in empty:
-        printRow(row)
-    print()
-    print()
+        Print2FileRow(row)
+    Print2File()
+    Print2File()
 
 def FindDuplicates(imagesInDB):
     dupList = dict()
@@ -139,18 +128,18 @@ def FindDuplicates(imagesInDB):
         else:
             dupes += 1
             dupList[imgnum].append(row)
-    print("Found " + str(dupes) + " duplicates.")
+    Print2File("Found " + str(dupes) + " duplicates.")
     for rowlist in dupList.values():
         if len(rowlist) > 1 :
-            print( str(len(rowlist)) + " instances of " + str(rowlist[0][imgnumIndex]) + ":")
-            printRowHeader()
+            Print2File( str(len(rowlist)) + " instances of " + str(rowlist[0][imgnumIndex]) + ":")
+            PrintRowHeader()
             for row in rowlist:
-                printRow(row)
-            print()
+                Print2FileRow(row)
+            Print2File()
 
-def printSectSeperator():
-    print("==================================================================================================")
-    print("==================================================================================================")
+def Print2FileSectSeperator():
+    Print2File("==================================================================================================")
+    Print2File("==================================================================================================")
 
 
 
@@ -161,13 +150,13 @@ def getImgListFromLR(school,lrcat):
     columns = "name=base"
     criteria = f"collection={school}, rating=>4"
     rows = lrdb.lrphoto.select_generic(columns, criteria).fetchall() # type: ignore
-    print("Got " + str(len(rows)) + " images from LR")
+    Print2File("Got " + str(len(rows)) + " images from LR")
     if(len(rows) == 0):
-        print(r"/!\ /!\ /!\  !!! ")
-        print(r" T   T   T")
-        print("WARNING !!!!  NO IMAGES FROM LIGHTROOM !!!!")
-        print(r"/!\ /!\ /!\  !!! ")
-        print(r" T   T   T")        
+        Print2File(r"/!\ /!\ /!\  !!! ")
+        Print2File(r" T   T   T")
+        Print2File("WARNING !!!!  NO IMAGES FROM LIGHTROOM !!!!")
+        Print2File(r"/!\ /!\ /!\  !!! ")
+        Print2File(r" T   T   T")        
         return []
     pattern = re.compile(r"(\d+)$")
     matches = []
@@ -199,7 +188,7 @@ def getImgListFromFolder(lrcat_field):
     if(lrcat_field != ""):
         folder = lrcat_field
     if(not os.path.isdir(folder)):
-        print(f"ERROR: No such folder {folder}")
+        Print2File(f"ERROR: No such folder {folder}")
     else:
         files = glob.glob("*.jpg")
         for file in files:
@@ -207,13 +196,13 @@ def getImgListFromFolder(lrcat_field):
             match = re.findall(r"(\d{1,4})\.jpg",file)
             if(len(match)>0):
                 imglist.append(match[0])
-    print("Got " + str(len(imglist)) + f" images from folder {folder}")
+    Print2File("Got " + str(len(imglist)) + f" images from folder {folder}")
     if(len(imglist) == 0):
-        print(r"/!\ /!\ /!\  !!! ")
-        print(r" T   T   T")
-        print("WARNING !!!!  NO IMAGES FOUND IN FOLDER!!!!")
-        print(r"/!\ /!\ /!\  !!! ")
-        print(r" T   T   T") 
+        Print2File(r"/!\ /!\ /!\  !!! ")
+        Print2File(r" T   T   T")
+        Print2File("WARNING !!!!  NO IMAGES FOUND IN FOLDER!!!!")
+        Print2File(r"/!\ /!\ /!\  !!! ")
+        Print2File(r" T   T   T") 
     return imglist
 
 #################
@@ -222,10 +211,15 @@ def getImgListFromFolder(lrcat_field):
 if __name__ == "__main__":
     try:
         isDND = doDND()
+        logFile = 'imgListValidatorOut.txt'
+        try:
+            OUTFILE = open(logFile, 'w', encoding='utf-8')
+        except:
+            print(f"Failed to open {logFile}")
+            input("Press any key...")
+            sys.exit()
         TABLE = getTablePath()
         school,lrcat,SheetID,SheetName = getAccessMetaData(TABLE)
-        logFile = 'imgListValidatorOut.txt'
-        sys.stdout =  open(logFile, 'w', encoding='utf-8')
         empty = getEmpty()
         nonEmpty = getNonEmpty()
         if(lrcat == None):
@@ -242,17 +236,16 @@ if __name__ == "__main__":
             imgList = RemoveLeadingZerosFromList(imgList)
             RemoveLeadingZerosFromDB(nonEmpty)
             checkImgExists(nonEmpty,imgList)
-            printSectSeperator()
+            Print2FileSectSeperator()
             checkImagesNotInDB(nonEmpty,imgList)
-            printSectSeperator()
+            Print2FileSectSeperator()
 
         FindDuplicates(nonEmpty)
-        printSectSeperator()
-        printEmpty(empty)
+        Print2FileSectSeperator()
+        Print2FileEmpty(empty)
         currdir = os.getcwd()
-        #sys.stdout.close()
-        #os.system(f"notepad {currdir}\\{logFile}")
+        OUTFILE.close()
     except Exception as err:
-        print(f"Unexpected ERROR:\n {err=}, {type(err)=}")
-        print("error is: "+ traceback.format_exc())
-        #input("press any key")
+        Print2File(f"Unexpected ERROR:\n {err=}, {type(err)=}")
+        Print2File("error is: "+ traceback.format_exc())
+        OUTFILE.close()
