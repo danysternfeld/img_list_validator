@@ -23,7 +23,11 @@ def flip(x):
     return new_list
   return get_display(x)
 
-    
+def ErrorOut(msg):
+        print(flip(msg))
+        input("press any key...")
+        sys.exit()    
+
 def clean(filename):
     if(os.path.exists(filename)):
         os.remove(filename)
@@ -39,7 +43,7 @@ def read_csv(filename):
 
 def transform_data(lines):
     col_headers = ["DB Code",	"auto number", 	"First Name",	"Last Name",	"Class number",	
-                   "InBook",	"InPicture",	"Content",	"Content2",	"Content2",	"Job Title",
+                   "InBook",	"InPicture",	"Content",	"Content2",	"Content3",	"Job Title",
                    "Day 2",	"Day 3"]
     ColIndices = {}
     for header,index in zip(col_headers,range(len(col_headers))):
@@ -67,36 +71,27 @@ def gen_new_excel(lines):
         currentDir = os.getcwd()
         print(flip(fr"Created {currentDir}\{filename}"))
     except PermissionError:
-        print("Error: Failed to write data.xlsx. If opened in excel please close it.")
-        input("Press any key...")
-        sys.exit() 
-
+        ErrorOut("Error: No permissions to write data.xlsx. If opened in excel please close it.")
+    except:
+        ErrorOut("Error: Unknnown error while trying to write data.xlsx.")
 
 
 TABLE = ""
 
 
 if __name__ == "__main__":
-    needCleanup = False
     localfile = glob.glob(r".\*.csv")
     if len(localfile) > 1 :
-        print(f"Error: More than 1 csv file foud in {os.getcwd()} : " + ','.join(localfile))
-        input("press any key...")
-        sys.exit()
+        ErrorOut(f"Error: More than 1 csv file foud in {os.getcwd()} : " + ','.join(localfile))
     if len(localfile) == 1 :
         filename = localfile[0]
     else:
-        print(f"Error: No csv file foud in {os.getcwd()} : " + ','.join(localfile))
-        input("press any key...")
-        sys.exit()
-
+        ErrorOut(f"Error: No csv file foud in {os.getcwd()} : " + ','.join(localfile))
     
     lines = read_csv(filename)
     data = transform_data(lines)
     if not data.empty:
         gen_new_excel(data)
-    if needCleanup:
-        clean(filename)
     
 
 
