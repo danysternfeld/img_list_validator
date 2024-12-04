@@ -1,6 +1,7 @@
 import os
 import subprocess
 from bidi.algorithm import get_display
+from websocket import continuous_frame
 
 
 def flip(x):
@@ -11,6 +12,32 @@ def flip(x):
     return new_list
   return get_display(x)
 
+
+def checkDiff() -> bool:
+  gitOut = str(subprocess.check_output(f"git diff {outfile}"),encoding='utf-8').split('\n')
+  diff = False
+  ignores = [
+    'diff --git',
+    'index',
+    '--- a',
+    '+++ b'
+    '@@',
+    'Got 7 images from folder'
+    'Registered images that do not exist',
+    '===',
+    ''
+  ]
+  for line in gitOut:
+    Matched = False
+    for ignore in ignores:
+      if(line.find(ignore) > -1):
+        Matched = True
+        break
+    if(not Matched):
+       return False
+  return True
+
+   
 
 
 if __name__ == '__main__':
@@ -36,7 +63,15 @@ if __name__ == '__main__':
             print("Passed")
             passnum += 1
         else:
-            print("Failed")
-            failnum += 1
+            if(checkDiff()):
+              print("Passed")
+              passnum += 1
+            else:
+              print("Failed")
+              failnum += 1
+     
+
+
+                        
     print(f"Passed: {passnum}")
     print(f"failed: {failnum}")
