@@ -62,6 +62,9 @@ def open_location():
 def year_listbox_event(event):
     update_school_listbox(get_root_dir(),year_dropdown.get())
 
+def launch_access_event(event):
+    launch_access()    
+
 root_dir = get_root_dir()
 
 window = ttk.Window(title='ShotList launcher',themename='cyborg')
@@ -77,6 +80,7 @@ school_frame = ttk.Frame()
 scrollbar = ttk.Scrollbar(school_frame)
 school_listbox = ttk.Treeview(school_frame, yscrollcommand=scrollbar.set, show="tree")
 scrollbar.configure(command=school_listbox.yview)
+school_listbox.bind("<Double-1>", launch_access_event)
 update_school_listbox(root_dir,year_dropdown.get())
 
 
