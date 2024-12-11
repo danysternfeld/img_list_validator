@@ -1,8 +1,3 @@
-from ctypes import alignment
-import tkinter as tk
-from turtle import left, up
-from click import command
-from more_itertools import first
 import ttkbootstrap as ttk
 import platform
 import os
@@ -70,8 +65,6 @@ def year_listbox_event(event):
 root_dir = get_root_dir()
 
 window = ttk.Window(title='ShotList launcher',themename='cyborg')
-#window.geometry('400x500')
-
 
 years = get_years(root_dir)
 year_dropdown = ttk.Combobox(values=years)
