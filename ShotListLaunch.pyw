@@ -7,8 +7,8 @@ import glob
 import sys
 def get_root_dir():
     PCName = platform.node()
-    if(PCName == 'GLADOS'):
-        return ""
+    if(PCName == 'glados'):
+        return r"D:\users\dany\onedrive\Documents\טוטל_פרינט\בתי ספר"
     else:
         return r"C:\Users\danys\OneDrive\Documents\טוטל_פרינט\בתי ספר"
 
