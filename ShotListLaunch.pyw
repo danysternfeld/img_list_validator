@@ -1,3 +1,4 @@
+from tkinter import E
 import ttkbootstrap as ttk
 import platform
 import os
@@ -70,7 +71,7 @@ root_dir = get_root_dir()
 window = ttk.Window(title='ShotList launcher',themename='cyborg')
 
 years = get_years(root_dir)
-year_dropdown = ttk.Combobox(values=years)
+year_dropdown = ttk.Combobox(values=years, justify='right')
 year_dropdown.current(0)
 year_dropdown.pack(pady=10)
 year_dropdown.bind("<<ComboboxSelected>>",year_listbox_event)
@@ -81,6 +82,7 @@ scrollbar = ttk.Scrollbar(school_frame)
 school_listbox = ttk.Treeview(school_frame, yscrollcommand=scrollbar.set, show="tree")
 scrollbar.configure(command=school_listbox.yview)
 school_listbox.bind("<Double-1>", launch_access_event)
+school_listbox.column('# 0', anchor='e')
 update_school_listbox(root_dir,year_dropdown.get())
 
 
