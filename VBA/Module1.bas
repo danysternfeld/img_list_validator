@@ -41,10 +41,6 @@ Case Else
 End Select
 Next intI
 End If
-' stupid - can use hebrew chars so resorting to this foolishness
-If Len(strInput) - Len(strResult) > 5 Then
-    strResult = -1
-End If
 ExtractNumeric = Val(strResult)
 
 End Function
