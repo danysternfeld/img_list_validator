@@ -1,11 +1,18 @@
-from tkinter import E
+# A little gui tool to launch school access files.
+# Assumes a dir structure of
+#  root/
+#   {year}/
+#       {school1}
+#       {school2}
+#      ...
+###################################################        
 import ttkbootstrap as ttk
 import platform
 import os
 import re
 import glob
 
-import sys
+# get roo dir per PC's I use.
 def get_root_dir():
     PCName = platform.node()
     if(PCName == 'glados'):
@@ -13,10 +20,10 @@ def get_root_dir():
     else:
         return r"C:\Users\danys\OneDrive\Documents\טוטל_פרינט\בתי ספר"
 
+# List year directories
 def get_years(root_dir):
     dirs = os.listdir(root_dir)
     years = []
-
     for dir in dirs:
         if(re.match(r'^\d\d\d\d$',str(dir)) and 
            os.path.isdir(fr'{root_dir}\{dir}')):
@@ -24,26 +31,31 @@ def get_years(root_dir):
     years.sort(reverse=True)
     return years
     
+# list school dirs in year directory    
 def get_shcools_with_accdb(root_dir,year):
     root = fr'{root_dir}\{year}'
     dirs = os.listdir(root)
     schools = []
     for dir in dirs:
         full_path = fr'{root}\{dir}'
+        # filter for directories that contain access files.
         if( os.path.isdir(full_path) and 
            len(glob.glob(fr'{full_path}\*.accdb')) > 0):
             schools.append(dir)
     schools.sort()
     return schools
 
+
 def update_school_listbox(root_dir,year):
     school_listbox.delete(*school_listbox.get_children())
     for school in get_shcools_with_accdb(root_dir,year):
         school_listbox.insert("", "end", text=school)
+    # select first item as default    
     first_item = school_listbox.get_children()[0]    
     school_listbox.selection_set(first_item)
     school_listbox.focus(first_item)
 
+# launches the first access file found in a school dir selected in the school listbox
 def launch_access():
     year = year_dropdown.get()
     school = school_listbox.item(school_listbox.focus())["text"]
@@ -52,6 +64,7 @@ def launch_access():
     access_file = glob.glob(fr'{dir}\*.accdb')
     os.startfile(access_file[0])
 
+# opens a school dir in explorer
 def open_location():
     year = year_dropdown.get()
     school = school_listbox.item(school_listbox.focus())["text"]
@@ -60,6 +73,7 @@ def open_location():
     print(dir)
     os.startfile(dir)
 
+# event handlers
 def year_listbox_event(event):
     update_school_listbox(get_root_dir(),year_dropdown.get())
 
@@ -68,6 +82,7 @@ def launch_access_event(event):
 
 root_dir = get_root_dir()
 
+# GUI defs
 window = ttk.Window(title='ShotList launcher',themename='cyborg')
 
 years = get_years(root_dir)
