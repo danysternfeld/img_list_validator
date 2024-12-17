@@ -72,6 +72,14 @@ def open_location():
     dir = fr'{root}\{year}\{school}'
     print(dir)
     os.startfile(dir)
+    return(dir)
+
+def validate():
+    dir = open_location()
+    os.chdir(dir)
+    os.startfile(os.path.dirname(os.path.realpath(__file__))+r'\img_list_validator.py'  )
+
+
 
 # event handlers
 def year_listbox_event(event):
@@ -113,5 +121,8 @@ folder_button = ttk.Button(button_frame,text="Open location",command=open_locati
 folder_button.pack(side='left',padx=5)
 
 button_frame.pack(pady=10)
+
+validate_button = ttk.Button(window,text="validate",command=validate)
+validate_button.pack(padx=5,pady=5)
 
 window.mainloop()
