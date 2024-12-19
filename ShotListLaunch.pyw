@@ -51,9 +51,10 @@ def update_school_listbox(root_dir,year):
     for school in get_shcools_with_accdb(root_dir,year):
         school_listbox.insert("", "end", text=school)
     # select first item as default    
-    first_item = school_listbox.get_children()[0]    
-    school_listbox.selection_set(first_item)
-    school_listbox.focus(first_item)
+    if school_listbox.get_children():
+        first_item = school_listbox.get_children()[0]    
+        school_listbox.selection_set(first_item)
+        school_listbox.focus(first_item)
 
 # launches the first access file found in a school dir selected in the school listbox
 def launch_access():
@@ -62,7 +63,8 @@ def launch_access():
     root = get_root_dir()
     dir = fr'{root}\{year}\{school}'
     access_file = glob.glob(fr'{dir}\*.accdb')
-    os.startfile(access_file[0])
+    if access_file:
+        os.startfile(access_file[0])
 
 # opens a school dir in explorer
 def open_location():
@@ -77,9 +79,7 @@ def open_location():
 def validate():
     dir = open_location()
     os.chdir(dir)
-    os.startfile(os.path.dirname(os.path.realpath(__file__))+r'\img_list_validator.py'  )
-
-
+    os.startfile(os.path.dirname(os.path.realpath(__file__))+r'\img_list_validator.py')
 
 # event handlers
 def year_listbox_event(event):
@@ -107,7 +107,6 @@ scrollbar.configure(command=school_listbox.yview)
 school_listbox.bind("<Double-1>", launch_access_event)
 school_listbox.column('# 0', anchor='e')
 update_school_listbox(root_dir,year_dropdown.get())
-
 
 scrollbar.pack(side="right", fill="y")
 school_listbox.pack(side="left",  expand=True)
