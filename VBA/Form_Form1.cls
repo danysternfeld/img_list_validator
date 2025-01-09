@@ -83,6 +83,7 @@ Me.shotCount.Requery
 Me.numAdditionals.Requery
 Me.additionals.Requery
 Me.noShotsByClass.Requery
+Me.Rates.Requery
 Me.showLast.Requery
 Dim recs As Integer
 Dim shots As Integer
