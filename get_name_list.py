@@ -13,6 +13,7 @@ import csv
 import glob
 import pandas as pd
 from bidi.algorithm import get_display
+import pprint
 
 
 def flip(x):
@@ -34,11 +35,11 @@ def clean(filename):
 
 def read_csv(filename):
     with open(filename, newline='',encoding='utf8') as csvfile:
-        csvreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        csvreader = csv.reader(csvfile, quotechar='|')
         lines = []
         for row in csvreader:
-            lines.append(row[0].split(",")) 
-        # drop the first 5 lines. they contain junk we don't need.      
+            lines.append(row) 
+        # drop the first 5 lines. they contain junk we don't need.     
         return lines[5:]
 
 def transform_data(lines):
