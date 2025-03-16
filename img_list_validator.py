@@ -24,6 +24,7 @@
 # if Summary.txt is missing the script will only perform some of the checks.
 #################################################################################
 
+from itertools import count
 import re
 import sys
 import os
@@ -41,7 +42,8 @@ codeIndex = 1
 imgnumIndex = 5
 lastnameIndex = 3
 firstnameIndex = 4
-timestampIndex = 7
+prevImgIndex = 7
+timestampIndex = 8
 
 
 def Print2File(txt=''):
@@ -52,6 +54,9 @@ def getEmpty():
 
 def getNonEmpty():
     return runSQL('select * from ' + tablename + ' where פספורט is NOT NULL',TABLE)
+
+def getRowsWithPrevImage():
+    return runSQL('select * from ' + tablename + ' where פספורט is NOT NULL AND Prev_Img is NOT NULL',TABLE)
 
 def doDND():
     # this supports dropping a folder onto this script
@@ -66,13 +71,13 @@ def PrintRowHeader():
     Print2File("code\t\timg Number\t\tname")
     Print2File("-------------------------------")
 
-def Print2FileRow(row):
+def Print2FileRow(row,index=imgnumIndex):
     code = row[codeIndex]
     if(code != None):
         code = str(int(code))
     else:
         code = "       "
-    Print2File(code + "\t\t" + str(row[imgnumIndex]) + "\t\t" + str(row[firstnameIndex]) + " " + str(row[lastnameIndex]))
+    Print2File(code + "\t\t" + str(row[index]) + "\t\t" + str(row[firstnameIndex]) + " " + str(row[lastnameIndex]))
 
 def checkImgExists(nonEmptyRows,imgList):
     Print2File("Registered images that do not exist:")
@@ -89,19 +94,35 @@ def checkImgExists(nonEmptyRows,imgList):
     Print2File()
     Print2File()
 
+def OutdatedImages(doubleImages):
+    Print2File("Outdated Images (Newer images registered) :")
+    Print2File("-------------------------------")
+    Print2File()
+    PrintRowHeader()
+    count = 0
+    for row in doubleImages:
+        Print2FileRow(row,prevImgIndex)
+        count += 1
+    Print2File("Total :" + str(count))
+    Print2File()
+    Print2File()
 
-def checkImagesNotInDB(nonEmptyRows,imgList):
+def checkImagesNotInDB(nonEmptyRows,imgList,doubleImages):
     Print2File("Images that are not registered:")
     Print2File("-------------------------------")
     Print2File()
     Print2File("image number")
     Print2File("------------")
     registered = []
+    doubles = []
     count = 0
     for row in nonEmptyRows:
         registered.append(row[imgnumIndex])
+    for row in doubleImages:
+        doubles.append(row[prevImgIndex])
+
     for img in imgList:
-        if not img in registered:
+        if (not img in registered) and (not img in doubles):
             Print2File(img)
             count += 1
     Print2File("Total :" + str(count))
@@ -222,6 +243,7 @@ if __name__ == "__main__":
         school,lrcat,SheetID,SheetName = getAccessMetaData(TABLE)
         empty = getEmpty()
         nonEmpty = getNonEmpty()
+        doubleImages = getRowsWithPrevImage()
         if(lrcat == None):
             # empty lrcat field - use CWD
             imgList = getImgListFromFolder("")
@@ -237,7 +259,9 @@ if __name__ == "__main__":
             RemoveLeadingZerosFromDB(nonEmpty)
             checkImgExists(nonEmpty,imgList)
             Print2FileSectSeperator()
-            checkImagesNotInDB(nonEmpty,imgList)
+            OutdatedImages(doubleImages)
+            Print2FileSectSeperator()
+            checkImagesNotInDB(nonEmpty,imgList,doubleImages)
             Print2FileSectSeperator()
 
         FindDuplicates(nonEmpty)
