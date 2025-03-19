@@ -95,6 +95,8 @@ def checkImgExists(nonEmptyRows,imgList):
     Print2File()
 
 def OutdatedImages(doubleImages):
+    if(len(doubleImages) == 0):
+        return
     Print2File("Outdated Images (Newer images registered) :")
     Print2File("-------------------------------")
     Print2File()
