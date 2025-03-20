@@ -45,7 +45,7 @@ if __name__ == '__main__':
     Totest = r"..\..\img_list_validator.py"
     outfile = 'imgListValidatorOut.txt'
     testcaseRoot = '..\\'
-    testcases = ["With_folder","With_LR_DATA","כלי עזר של דני_משירלי"]
+    testcases = ["With_folder","With_LR_DATA","כלי עזר של דני_משירלי","With_folder_TABLE_VERSION_1.0"]
     passnum = 0
     failnum = 0
     for testcase in testcases:

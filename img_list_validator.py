@@ -49,6 +49,14 @@ timestampIndex = 8
 def Print2File(txt=''):
     OUTFILE.writelines(txt+'\n')
 
+def GetTableVersion():
+    rows = runSQL('select * from ' + tablename, TABLE)
+    for row in rows:
+        if len(row) == 8:
+            return 1.0
+        else:
+            return 2.0
+
 def getEmpty():
     return runSQL('select * from ' + tablename + ' where פספורט is NULL',TABLE)
 
@@ -120,9 +128,11 @@ def checkImagesNotInDB(nonEmptyRows,imgList,doubleImages):
     count = 0
     for row in nonEmptyRows:
         registered.append(row[imgnumIndex])
-    for row in doubleImages:
-        doubles.append(row[prevImgIndex])
-
+    if(TableVersion == 2.0):
+        for row in doubleImages:
+            doubles.append(row[prevImgIndex])
+    else:
+        doubles = []
     for img in imgList:
         if (not img in registered) and (not img in doubles):
             Print2File(img)
@@ -243,9 +253,13 @@ if __name__ == "__main__":
             sys.exit()
         TABLE = getTablePath()
         school,lrcat,SheetID,SheetName = getAccessMetaData(TABLE)
+        TableVersion = GetTableVersion()
         empty = getEmpty()
         nonEmpty = getNonEmpty()
-        doubleImages = getRowsWithPrevImage()
+        if(TableVersion == 2.0):
+            doubleImages = getRowsWithPrevImage()
+        else:
+            doubleImages = []
         if(lrcat == None):
             # empty lrcat field - use CWD
             imgList = getImgListFromFolder("")
@@ -261,8 +275,9 @@ if __name__ == "__main__":
             RemoveLeadingZerosFromDB(nonEmpty)
             checkImgExists(nonEmpty,imgList)
             Print2FileSectSeperator()
-            OutdatedImages(doubleImages)
-            Print2FileSectSeperator()
+            if(TableVersion == 2.0):
+                OutdatedImages(doubleImages)
+                Print2FileSectSeperator()
             checkImagesNotInDB(nonEmpty,imgList,doubleImages)
             Print2FileSectSeperator()
 

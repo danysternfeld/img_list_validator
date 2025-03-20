@@ -1,4 +1,4 @@
-Got 7 images from LR
+Got 7 images from folder C:\Users\danys\OneDrive\Documents\scripts\img_list_validator\TestData\With_folder
 Registered images that do not exist:
 =====================================
 
