@@ -54,7 +54,8 @@ update_shotCount
 End Sub
 
 Private Sub Form_Load()
-Me.Width = Me.data_subform.Width + 0.2
+'Me.Width = Me.data_subform.Width + 0.2
+DoCmd.Maximize
 End Sub
 
 Private Sub Form_Open(Cancel As Integer)
@@ -92,10 +93,11 @@ shots = Me.shotCount.value
 Adds = Me.numAdditionals.value
 recs = DCount("*", "[Data]")
 On Error GoTo errorH
-Me.shotCountLabel.Caption = shots & " (" & Int(shots / recs * 100) & "%)  Added: " & Adds
+Me.shotCountLabel.Caption = shots & " (" & Int(shots / recs * 100) & "%)  Added: " & Adds & " Remaining: " & recs - shots
 doProgress
 errorH:
 End Sub
+
 
 Private Sub srch_LostFocus()
 update_shotCount
@@ -111,4 +113,27 @@ recs = DCount("*", "[Data]")
 percent = shots / recs
 Me.progress.Width = fullW * percent
 Me.PCT.Caption = Int(percent * 100) & "%"
+doTimeToFinish
+End Sub
+
+Private Sub doTimeToFinish()
+    strSQL = "SELECT Last(getRate.SHootDate) AS LastOfSHootDate, Last(getRate.PersonPerHour) AS LastOfPersonPerHour FROM getRate"
+    Set RS = CurrentDb.OpenRecordset(strSQL)
+    If Not (RS.EOF And RS.BOF) Then
+        RS.MoveFirst
+        PPH = RS.Fields(1)
+        If Nz(PPH) = 0 Then
+            PPH = "0"
+        End If
+        TTF = Round((DCount("*", "[Data]") - Me.shotCount.value) / PPH, 2)
+        If TTF < 1 Then
+            Me.LTimeToFinish.Caption = "Time to finish: " & Round(TTF * 60, 0) & " Minutes"
+        Else
+            Me.LTimeToFinish.Caption = "Time to finish: " & TTF & " Hours"
+        End If
+    Else
+        Me.LTimeToFinish.Caption = "Inf"
+    End If
+    
+
 End Sub
