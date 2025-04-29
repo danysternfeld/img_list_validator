@@ -181,7 +181,7 @@ def getImgListFromLR(school,lrcat):
 
     # select photos
     columns = "name=base"
-    criteria = f"collection={school}, rating=>4"
+    criteria = f"collection={school}, rating=>1"
     rows = lrdb.lrphoto.select_generic(columns, criteria).fetchall() # type: ignore
     Print2File("Got " + str(len(rows)) + " images from LR")
     if(len(rows) == 0):
