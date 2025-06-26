@@ -32,6 +32,7 @@ import glob
 import traceback
 from lrtools.lrcat import LRCatDB, LRCatException
 from lrtools.lrselectgeneric import LRSelectException
+from traitlets import All
 from modules.access import *
 
 TABLE = ""
@@ -79,15 +80,18 @@ def PrintRowHeader():
     Print2File("code\t\timg Number\t\tname")
     Print2File("-------------------------------")
 
-def Print2FileRow(row,index=imgnumIndex):
+def Print2FileRow(row,index=imgnumIndex,existsButUnrated=False):
     code = row[codeIndex]
+    ExistsComment = ""
+    if existsButUnrated:
+        ExistsComment = "\t\t*** (Image exists but not rated) ***"
     if(code != None):
         code = str(int(code))
     else:
         code = "       "
-    Print2File(code + "\t\t" + str(row[index]) + "\t\t" + str(row[firstnameIndex]) + " " + str(row[lastnameIndex]))
+    Print2File(code + "\t\t" + str(row[index]) + "\t\t" + str(row[firstnameIndex]) + " " + str(row[lastnameIndex]) + ExistsComment)
 
-def checkImgExists(nonEmptyRows,imgList):
+def checkImgExists(nonEmptyRows,imgList,AllImagesList=[]):
     Print2File("Registered images that do not exist:")
     Print2File("=====================================")
     Print2File()
@@ -95,8 +99,11 @@ def checkImgExists(nonEmptyRows,imgList):
     count = 0
     for row in nonEmptyRows:
         imgNum = row[imgnumIndex]
+        ExistsButUnrated = False
         if not imgNum in imgList:
-            Print2FileRow(row)
+            if imgNum in AllImagesList:
+                ExistsButUnrated = True
+            Print2FileRow(row,imgnumIndex,ExistsButUnrated)
             count += 1
     Print2File("Total :" + str(count))
     Print2File()
@@ -176,14 +183,13 @@ def Print2FileSectSeperator():
 
 
 
-def getImgListFromLR(school,lrcat):
+def getImgListFromLR(school,lrcat,rating=">=1"):
     lrdb = LRCatDB(lrcat)
-
     # select photos
     columns = "name=base"
-    criteria = f"collection={school}, rating=>1"
+    criteria = f"collection={school}, rating={rating}"
     rows = lrdb.lrphoto.select_generic(columns, criteria).fetchall() # type: ignore
-    Print2File("Got " + str(len(rows)) + " images from LR")
+    Print2File("Got " + str(len(rows)) + " images from LR with rating " + rating)
     if(len(rows) == 0):
         Print2File(r"/!\ /!\ /!\  !!! ")
         Print2File(r" T   T   T")
@@ -256,6 +262,8 @@ if __name__ == "__main__":
         TableVersion = GetTableVersion()
         empty = getEmpty()
         nonEmpty = getNonEmpty()
+        imgList = []
+        AllImagesList = []
         if(TableVersion == 2.0):
             doubleImages = getRowsWithPrevImage()
         else:
@@ -267,13 +275,16 @@ if __name__ == "__main__":
             if isLR(lrcat):
                 lrcat = os.path.expandvars(lrcat)
                 imgList = getImgListFromLR(school,lrcat)
+                AllImagesList = getImgListFromLR(school,lrcat,rating="=0")
             else:
                 # non empty and not LR cat: assume folder
                 imgList = getImgListFromFolder(lrcat)
         if len(imgList) > 0:
             imgList = RemoveLeadingZerosFromList(imgList)
-            RemoveLeadingZerosFromDB(nonEmpty)
-            checkImgExists(nonEmpty,imgList)
+            if len(AllImagesList) > 0:
+                AllImagesList = RemoveLeadingZerosFromList(AllImagesList)            
+            RemoveLeadingZerosFromDB(nonEmpty)  
+            checkImgExists(nonEmpty,imgList,AllImagesList)
             Print2FileSectSeperator()
             if(TableVersion == 2.0):
                 OutdatedImages(doubleImages)

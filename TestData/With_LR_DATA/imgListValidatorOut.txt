@@ -1,4 +1,5 @@
-Got 7 images from LR
+Got 7 images from LR with rating >=1
+Got 5 images from LR with rating =0
 Registered images that do not exist:
 =====================================
 
@@ -7,7 +8,7 @@ code		img Number		name
 881059		4565		חסון ליהיא
 881060		4567		יוסף אלה
 881061		4569		כהן נועם-דוד
-881067		4555		משה רואי
+881067		4555		משה רואי		*** (Image exists but not rated) ***
 881068		1234		סגי יהונתן
 881089		4565		חמו ליהיא
        		6473		קניגספלד כרמית
