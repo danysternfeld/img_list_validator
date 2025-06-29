@@ -19,6 +19,16 @@ ErrorHandler:
     res = MsgBox("Import failed. Check that data.xslx exists.", vbOKOnly, "Error !")
 End Sub
 
+Private Sub init_timestamps()
+Dim db As Database
+Dim qdf As QueryDef
+Set db = CurrentDb
+sqlstr = "UPDATE data SET data.[timeStamp] = #1/1/1980#;"
+Set qdf = db.CreateQueryDef("deleteme", sqlstr)
+qdf.Execute dbFailOnError
+qdf.Close
+CurrentDb.QueryDefs.Delete "deleteme"
+End Sub
 
 Private Sub Command0_Click()
 If (MsgBox("All Data will be deleted !!!" & (Chr(13) & Chr(10)) & " Are you Sure ?", vbOKCancel, "WARNING !!!!")) = vbCancel Then
@@ -28,6 +38,7 @@ DoCmd.SetWarnings False
 DoCmd.RunSQL "DELETE * FROM Data"
 DoCmd.SetWarnings True
 Me.Import_from_excel
+init_timestamps
 res = MsgBox("Import done.", vbOKOnly, "Success !")
 
 End Sub
