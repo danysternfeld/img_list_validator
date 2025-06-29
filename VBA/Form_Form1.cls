@@ -79,6 +79,37 @@ Private Sub srch_GotFocus()
 update_shotCount
 End Sub
 
+Function queryEmpty(sqlstr) As Boolean
+   Set RS = CurrentDb.OpenRecordset(sqlstr)
+    If (RS.EOF And RS.BOF) Then
+    ' empty
+    queryEmpty = True
+    Else
+    ' not empty
+    queryEmpty = False
+    End If
+End Function
+
+Private Sub show_Light()
+    strsqlDup = "SELECT First(dataNoHeb.[IMG]) AS [IMG Field], Count(dataNoHeb.[IMG]) AS NumberOfDups FROM dataNoHeb GROUP BY dataNoHeb.[IMG] HAVING (((Count(dataNoHeb.[IMG]))>1));"
+    strsqllegal = "SELECT datanoheb.[img] FROM Datanoheb  WHERE (((datanoheb.img) Not Like '????')) OR ((( datanoheb.img) Like '*[!0123456789]*'))"
+If Not queryEmpty(strsqlDup) Or Not queryEmpty(strsqllegal) Then
+        Me.RedLight.Visible = True
+        Me.Greenlight.Visible = False
+        Me.dupreg.Visible = True
+        Me.dupregLabel.Visible = True
+        Me.illegal.Visible = True
+        Me.illegalLabel.Visible = True
+Else
+        Me.RedLight.Visible = False
+        Me.Greenlight.Visible = True
+        Me.dupreg.Visible = False
+        Me.dupregLabel.Visible = False
+        Me.illegal.Visible = False
+        Me.illegalLabel.Visible = False
+End If
+End Sub
+
 Private Sub update_shotCount()
 Me.shotCount.Requery
 Me.numAdditionals.Requery
@@ -86,6 +117,9 @@ Me.additionals.Requery
 Me.noShotsByClass.Requery
 Me.Rates.Requery
 Me.showLast.Requery
+Me.dupreg.Requery
+Me.illegal.Requery
+show_Light
 Dim recs As Integer
 Dim shots As Integer
 Dim Adds As Integer
