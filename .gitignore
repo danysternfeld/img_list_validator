@@ -5,4 +5,5 @@ dist/*
 *.pyc
 *.xlsx
 */desktop.ini
-
+TestData/With_LR_DATA/Sample_lrcat/Sample_lrcat?Previews.lrdata/*
+TestData/With_LR_DATA/Sample_lrcat/Sample_lrcat.lrcat-Data/*
