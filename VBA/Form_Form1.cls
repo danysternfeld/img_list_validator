@@ -93,13 +93,21 @@ End Function
 Private Sub show_Light()
     strsqlDup = "SELECT First(dataNoHeb.[IMG]) AS [IMG Field], Count(dataNoHeb.[IMG]) AS NumberOfDups FROM dataNoHeb GROUP BY dataNoHeb.[IMG] HAVING (((Count(dataNoHeb.[IMG]))>1));"
     strsqllegal = "SELECT datanoheb.[img] FROM Datanoheb  WHERE (((datanoheb.img) Not Like '????')) OR ((( datanoheb.img) Like '*[!0123456789]*'))"
-If Not queryEmpty(strsqlDup) Or Not queryEmpty(strsqllegal) Then
+    Dim dup As Boolean
+    Dim illegal As Boolean
+    dup = Not queryEmpty(strsqlDup)
+    illegal = Not queryEmpty(strsqllegal)
+If dup Or illegal Then
         Me.RedLight.Visible = True
         Me.Greenlight.Visible = False
-        Me.dupreg.Visible = True
-        Me.dupregLabel.Visible = True
-        Me.illegal.Visible = True
-        Me.illegalLabel.Visible = True
+        If dup Then
+            Me.dupreg.Visible = True
+            Me.dupregLabel.Visible = True
+        End If
+        If illegal Then
+            Me.illegal.Visible = True
+            Me.illegalLabel.Visible = True
+        End If
 Else
         Me.RedLight.Visible = False
         Me.Greenlight.Visible = True
