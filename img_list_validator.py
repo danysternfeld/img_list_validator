@@ -197,7 +197,7 @@ def getImgListFromLR(school,lrcat,rating=">=1"):
         Print2File(r"/!\ /!\ /!\  !!! ")
         Print2File(r" T   T   T")        
         return []
-    pattern = re.compile(r"(\d+)$")
+    pattern = re.compile(r"(\d+)")
     matches = []
     for row in rows:
         matches.append((pattern.findall(row[0]))[0])  
