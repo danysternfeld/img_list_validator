@@ -127,6 +127,7 @@ Me.Rates.Requery
 Me.showLast.Requery
 Me.dupreg.Requery
 Me.illegal.Requery
+Me.getGauge.Requery
 show_Light
 Dim recs As Integer
 Dim shots As Integer
